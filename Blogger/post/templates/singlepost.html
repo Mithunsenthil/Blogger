@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{post.title}}</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #484848;
+            /* Dark background color */
+            color: white;
+            /* Light text color */
+        }
+
+        .card-body {
+            color: #664d4d;
+            /* Contrasting color for card body text */
+        }
+        .row{
+            color: rgb(124, 85, 85);
+        }
+        
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand " href="{% url 'popular' %}">Blogger</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+    
+    
+    
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'write' %}">Write a Blog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'edit_profile' %}">Edit Profile</a>
+                    </li>
+    
+                    <li>
+                        <form method="POST" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button class="btn btn-secondary" type="submit">Logout</button>
+                        </form>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">Register</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>{{post.title}}</h1>
+        <h6>Date Published : {{post.published_on}}</h2>
+        <h6>Category : {{post.category.name}}</h2>
+        <h6>User : {{post.author.first_name}} {{post.author.last_name}}</h2><br/>
+        <p>{{post.body}}</p>
+
+        <form action="{% url 'like_post' post.pk %}" method="POST">
+            {% csrf_token %}
+            {% if user.is_authenticated %}
+            {% if liked %}
+            <button type="submit" name="post_id" value="{{ post.id }}" class="btn btn-primary">UNLIKE -
+                {{total_likes}}</button>
+            {% else %}
+            <button type="submit" name="post_id" value="{{ post.id }}" class="btn btn-primary">LIKE -
+                {{total_likes}}</button>
+            {% endif %}
+            <br>
+            <hr style="height:2px;border-width:0;color:white;background-color:white">
+            {% if user.id == post.author.id %}
+                <a href="{% url 'delete' post.pk %}" class="btn btn-danger">Delete</a>
+                <a href="{% url 'update' post.pk %}" class="btn btn-warning">Update</a>
+                <hr style="height:3px;border-width:0;color:white;background-color:white">
+            {% endif %}
+            <a href="{% url 'popular' %}" class="btn btn-secondary">Back</a>
+            <hr style="height:2px;border-width:0;color:white;background-color:white">
+            
+                
+            {% else %}
+            <h5>LOGIN REQUIRED TO LIKE/DISLIKE</h5>
+            {% endif %}
+        </form>
+
+        <div class="comments">
+            <h2>Comments</h2>
+        <hr style="height:2px;border-width:100;color:white;background-color:white">   
+                {% if user.is_authenticated %}
+                    <a class="btn btn-primary" href="{% url 'write_comment' post.pk %}">add comment</a>
+                {% else %}
+                    <h1>YOU ARE NOT SIGNED IN </h1>
+                    <a class="nav-link" href="{% url 'login' %}">Login</a>
+                {% endif %}
+                    
+                    {% if not post.comments.all %}
+                        <p>No Comments Added...</p>
+                    {% else %}
+                    <ul>
+                        {% for comment in post.comments.all %}
+                        <li>
+                            {{ comment.user }} - {{ comment.date_added }}
+                            <br>
+                            {{ comment.body }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}                   
+                    </div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
